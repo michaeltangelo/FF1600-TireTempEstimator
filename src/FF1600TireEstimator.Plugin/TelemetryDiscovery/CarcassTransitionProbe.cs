@@ -39,6 +39,7 @@ namespace FF1600TireEstimator.Plugin.TelemetryDiscovery
         private long samples;
         private long pitEntries;
         private long changeEvents;
+        private long totalCalls;
         private long measuredCalls;
         private long totalElapsedTicks;
         private long maxElapsedTicks;
@@ -55,16 +56,20 @@ namespace FF1600TireEstimator.Plugin.TelemetryDiscovery
             }
             catch (Exception ex)
             {
-                Publish("Error: " + ex.GetType().Name + ": " + ex.Message, null);
+                Publish("Error: " + ex.GetType().Name + ": " + ex.Message, null, null);
             }
             finally
             {
                 var elapsed = Stopwatch.GetTimestamp() - startedAt;
-                measuredCalls++;
-                totalElapsedTicks += elapsed;
-                if (elapsed > maxElapsedTicks)
+                totalCalls++;
+                if (totalCalls > 120)
                 {
-                    maxElapsedTicks = elapsed;
+                    measuredCalls++;
+                    totalElapsedTicks += elapsed;
+                    if (elapsed > maxElapsedTicks)
+                    {
+                        maxElapsedTicks = elapsed;
+                    }
                 }
             }
         }
@@ -75,7 +80,7 @@ namespace FF1600TireEstimator.Plugin.TelemetryDiscovery
             if (!data.GameRunning || status == null || !string.Equals(status.CarId, "raygr22", StringComparison.Ordinal))
             {
                 ResetFrameState();
-                Publish("Waiting for active FF1600 telemetry", null);
+                Publish("Waiting for active FF1600 telemetry", null, null);
                 return;
             }
 
@@ -83,7 +88,7 @@ namespace FF1600TireEstimator.Plugin.TelemetryDiscovery
             if (wrapper == null)
             {
                 ResetFrameState();
-                Publish("Raw wrapper unavailable", null);
+                Publish("Raw wrapper unavailable", null, null);
                 return;
             }
 
@@ -92,7 +97,7 @@ namespace FF1600TireEstimator.Plugin.TelemetryDiscovery
             if (telemetry == null)
             {
                 ResetFrameState();
-                Publish("Telemetry payload unavailable", null);
+                Publish("Telemetry payload unavailable", null, null);
                 return;
             }
 
@@ -104,11 +109,12 @@ namespace FF1600TireEstimator.Plugin.TelemetryDiscovery
             var onPitRoad = Convert.ToBoolean(onPitRoadProperty.GetValue(telemetry, null), CultureInfo.InvariantCulture);
             samples++;
 
-            string eventSummary = null;
+            string pitEntrySummary = null;
+            string temperatureChangeSummary = null;
             if (previousOnPitRoad == false && onPitRoad)
             {
                 pitEntries++;
-                eventSummary = "Pit entry at tick " + tick + ", session " + Format(sessionTime);
+                pitEntrySummary = "Pit entry at tick " + tick + ", session " + Format(sessionTime);
             }
 
             if (previousTemperatures != null)
@@ -125,7 +131,7 @@ namespace FF1600TireEstimator.Plugin.TelemetryDiscovery
                 if (changed.Count > 0)
                 {
                     changeEvents++;
-                    eventSummary = string.Join(
+                    temperatureChangeSummary = string.Join(
                         Environment.NewLine,
                         "Temperature change at tick " + tick + ", session " + Format(sessionTime),
                         "Changed: " + changed.Count + "/12 (" + string.Join(", ", changed) + ")",
@@ -137,7 +143,10 @@ namespace FF1600TireEstimator.Plugin.TelemetryDiscovery
 
             previousTemperatures = current;
             previousOnPitRoad = onPitRoad;
-            Publish("Active; OnPitRoad=" + onPitRoad + ", Tick=" + tick + ", Session=" + Format(sessionTime), eventSummary);
+            Publish(
+                "Active; OnPitRoad=" + onPitRoad + ", Tick=" + tick + ", Session=" + Format(sessionTime),
+                pitEntrySummary,
+                temperatureChangeSummary);
         }
 
         private void EnsureAccessors(object wrapper)
@@ -175,7 +184,7 @@ namespace FF1600TireEstimator.Plugin.TelemetryDiscovery
             previousOnPitRoad = null;
         }
 
-        private void Publish(string status, string eventSummary)
+        private void Publish(string status, string pitEntrySummary, string temperatureChangeSummary)
         {
             var averageMicroseconds = measuredCalls == 0
                 ? 0.0
@@ -190,9 +199,11 @@ namespace FF1600TireEstimator.Plugin.TelemetryDiscovery
                     samples,
                     pitEntries,
                     changeEvents,
+                    measuredCalls,
                     averageMicroseconds,
                     maxMicroseconds,
-                    eventSummary ?? previous.LastEvent));
+                    pitEntrySummary ?? previous.LastPitEntry,
+                    temperatureChangeSummary ?? previous.LastTemperatureChange));
         }
 
         private static string Format(double value)
@@ -209,33 +220,39 @@ namespace FF1600TireEstimator.Plugin.TelemetryDiscovery
     internal sealed class CarcassTransitionSnapshot
     {
         public static readonly CarcassTransitionSnapshot Empty =
-            new CarcassTransitionSnapshot("Not sampled", 0, 0, 0, 0.0, 0.0, null);
+            new CarcassTransitionSnapshot("Not sampled", 0, 0, 0, 0, 0.0, 0.0, null, null);
 
         public CarcassTransitionSnapshot(
             string status,
             long samples,
             long pitEntries,
             long changeEvents,
+            long timingSamples,
             double averageMicroseconds,
             double maxMicroseconds,
-            string lastEvent)
+            string lastPitEntry,
+            string lastTemperatureChange)
         {
             Status = status;
             Samples = samples;
             PitEntries = pitEntries;
             ChangeEvents = changeEvents;
+            TimingSamples = timingSamples;
             AverageMicroseconds = averageMicroseconds;
             MaxMicroseconds = maxMicroseconds;
-            LastEvent = lastEvent;
+            LastPitEntry = lastPitEntry;
+            LastTemperatureChange = lastTemperatureChange;
         }
 
         public string Status { get; }
         public long Samples { get; }
         public long PitEntries { get; }
         public long ChangeEvents { get; }
+        public long TimingSamples { get; }
         public double AverageMicroseconds { get; }
         public double MaxMicroseconds { get; }
-        public string LastEvent { get; }
+        public string LastPitEntry { get; }
+        public string LastTemperatureChange { get; }
 
         public string GetSummary()
         {
@@ -246,10 +263,13 @@ namespace FF1600TireEstimator.Plugin.TelemetryDiscovery
                 "Samples: " + Samples,
                 "PitEntries: " + PitEntries,
                 "ChangeEvents: " + ChangeEvents,
+                "TimingSamplesAfterWarmup: " + TimingSamples,
                 "AverageProbeUs: " + AverageMicroseconds.ToString("F2", CultureInfo.InvariantCulture),
                 "MaxProbeUs: " + MaxMicroseconds.ToString("F2", CultureInfo.InvariantCulture),
-                "LastEvent:",
-                string.IsNullOrEmpty(LastEvent) ? "<none>" : LastEvent);
+                "LastPitEntry:",
+                string.IsNullOrEmpty(LastPitEntry) ? "<none>" : LastPitEntry,
+                "LastTemperatureChange:",
+                string.IsNullOrEmpty(LastTemperatureChange) ? "<none>" : LastTemperatureChange);
         }
     }
 }

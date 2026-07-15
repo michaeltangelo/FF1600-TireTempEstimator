@@ -43,6 +43,11 @@ is written to disk.
 
 Not yet executed.
 
+The first run revealed that a later pit-entry event overwrote the retained
+temperature-change detail. The follow-up probe retains `LastPitEntry` and
+`LastTemperatureChange` independently and excludes the first 120 calls from
+average/maximum timing to reduce JIT/accessor-initialization distortion.
+
 ## Artifacts
 
 No telemetry files are produced. Preserve screenshots externally and record
