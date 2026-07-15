@@ -32,10 +32,12 @@ sampled at 1 Hz. No additional SimHub properties are registered.
 ## Candidate raw members
 
 - Runtime assembly-qualified type
-- `SessionUniqueID`, `SessionTime`, and `TickCount`
-- `IsInGarage`, `OnPitRoad`, and `IsReplayPlaying`
-- `SessionData.WeekendInfo.SessionID` and `SubSessionID`
-- `LF/RF/LR/RR tempCL`, `tempCM`, and `tempCR`
+- Nested `Telemetry`, `SessionData`, and `AllSessionData` runtime types
+- `Telemetry.SessionUniqueID`, `SessionTime`, and `TickCount`
+- `Telemetry.IsInGarage`, `OnPitRoad`, and `IsReplayPlaying`
+- Wrapper and telemetry-nested `SessionData.WeekendInfo.SessionID` and
+  `SubSessionID`
+- `Telemetry.LF/RF/LR/RR tempCL`, `tempCM`, and `tempCR`
 
 Missing members, null intermediate objects, and reflection exceptions are
 rendered explicitly in the summary.

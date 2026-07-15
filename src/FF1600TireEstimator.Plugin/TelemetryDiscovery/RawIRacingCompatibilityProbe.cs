@@ -12,26 +12,28 @@ namespace FF1600TireEstimator.Plugin.TelemetryDiscovery
     {
         private static readonly string[] PropertyPaths =
         {
-            "SessionUniqueID",
-            "SessionTime",
-            "TickCount",
-            "IsInGarage",
-            "OnPitRoad",
-            "IsReplayPlaying",
+            "Telemetry.SessionUniqueID",
+            "Telemetry.SessionTime",
+            "Telemetry.TickCount",
+            "Telemetry.IsInGarage",
+            "Telemetry.OnPitRoad",
+            "Telemetry.IsReplayPlaying",
             "SessionData.WeekendInfo.SessionID",
             "SessionData.WeekendInfo.SubSessionID",
-            "LFtempCL",
-            "LFtempCM",
-            "LFtempCR",
-            "RFtempCL",
-            "RFtempCM",
-            "RFtempCR",
-            "LRtempCL",
-            "LRtempCM",
-            "LRtempCR",
-            "RRtempCL",
-            "RRtempCM",
-            "RRtempCR"
+            "Telemetry.SessionData.WeekendInfo.SessionID",
+            "Telemetry.SessionData.WeekendInfo.SubSessionID",
+            "Telemetry.LFtempCL",
+            "Telemetry.LFtempCM",
+            "Telemetry.LFtempCR",
+            "Telemetry.RFtempCL",
+            "Telemetry.RFtempCM",
+            "Telemetry.RFtempCR",
+            "Telemetry.LRtempCL",
+            "Telemetry.LRtempCM",
+            "Telemetry.LRtempCR",
+            "Telemetry.RRtempCL",
+            "Telemetry.RRtempCM",
+            "Telemetry.RRtempCR"
         };
 
         private long nextSampleAt;
@@ -67,6 +69,9 @@ namespace FF1600TireEstimator.Plugin.TelemetryDiscovery
                 }
 
                 var values = new Dictionary<string, string>();
+                values["Telemetry.@type"] = ReadTypePath(raw, "Telemetry");
+                values["SessionData.@type"] = ReadTypePath(raw, "SessionData");
+                values["AllSessionData.@type"] = ReadTypePath(raw, "AllSessionData");
                 foreach (var path in PropertyPaths)
                 {
                     values[path] = ReadPath(raw, path);
@@ -91,7 +96,10 @@ namespace FF1600TireEstimator.Plugin.TelemetryDiscovery
             {
                 "--- Raw iRacing compatibility (1 Hz) ---",
                 "RawType: " + current.RawType,
-                "RawError: " + Display(current.Error)
+                "RawError: " + Display(current.Error),
+                "Raw.TelemetryType: " + ReadTypeName(current.Values, "Telemetry"),
+                "Raw.SessionDataType: " + ReadTypeName(current.Values, "SessionData"),
+                "Raw.AllSessionDataType: " + ReadTypeName(current.Values, "AllSessionData")
             };
 
             foreach (var path in PropertyPaths)
@@ -131,6 +139,34 @@ namespace FF1600TireEstimator.Plugin.TelemetryDiscovery
             return formattable == null
                 ? current.ToString()
                 : formattable.ToString(null, CultureInfo.InvariantCulture);
+        }
+
+        private static string ReadTypeName(IDictionary<string, string> values, string path)
+        {
+            string value;
+            return values.TryGetValue(path + ".@type", out value) ? value : "<unavailable>";
+        }
+
+        private static string ReadTypePath(object root, string path)
+        {
+            object current = root;
+            foreach (var segment in path.Split('.'))
+            {
+                if (current == null)
+                {
+                    return "<null>";
+                }
+
+                var property = current.GetType().GetProperty(segment, BindingFlags.Public | BindingFlags.Instance);
+                if (property == null)
+                {
+                    return "<missing>";
+                }
+
+                current = property.GetValue(current, null);
+            }
+
+            return current == null ? "<null>" : current.GetType().AssemblyQualifiedName;
         }
 
         private static string Display(string value)
