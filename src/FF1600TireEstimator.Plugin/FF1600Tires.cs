@@ -94,19 +94,8 @@ namespace FF1600TireEstimator.Plugin
             this.AttachDelegate(name: "PluginAlive", valueProvider: () => 1);
             this.AttachDelegate(name: "DebugText", valueProvider: () => "FF1600 tire estimator plugin running");
 
-            // Temporary normalized telemetry discovery properties.
-            this.AttachDelegate(name: "DiscoveryGameName", valueProvider: () => normalizedIdentityProbe.Snapshot.GameName);
-            this.AttachDelegate(name: "DiscoveryCarId", valueProvider: () => normalizedIdentityProbe.Snapshot.CarId);
-            this.AttachDelegate(name: "DiscoveryCarModel", valueProvider: () => normalizedIdentityProbe.Snapshot.CarModel);
-            this.AttachDelegate(name: "DiscoverySessionId", valueProvider: () => normalizedIdentityProbe.Snapshot.SessionId);
-            this.AttachDelegate(name: "DiscoveryGameRunning", valueProvider: () => normalizedIdentityProbe.Snapshot.GameRunning);
-            this.AttachDelegate(name: "DiscoveryGamePaused", valueProvider: () => normalizedIdentityProbe.Snapshot.GamePaused);
-            this.AttachDelegate(name: "DiscoveryGameReplay", valueProvider: () => normalizedIdentityProbe.Snapshot.GameReplay);
-            this.AttachDelegate(name: "DiscoverySpectating", valueProvider: () => normalizedIdentityProbe.Snapshot.Spectating);
-            this.AttachDelegate(name: "DiscoveryIsInPit", valueProvider: () => normalizedIdentityProbe.Snapshot.IsInPit);
-            this.AttachDelegate(name: "DiscoveryIsInPitLane", valueProvider: () => normalizedIdentityProbe.Snapshot.IsInPitLane);
-            this.AttachDelegate(name: "DiscoveryFrameTimeUtc", valueProvider: () => normalizedIdentityProbe.Snapshot.FrameTimeUtc);
-            this.AttachDelegate(name: "DiscoveryDataUpdateHz", valueProvider: () => normalizedIdentityProbe.Snapshot.DataUpdateHz);
+            // Temporary normalized telemetry discovery display.
+            this.AttachDelegate(name: "DiscoverySummary", valueProvider: () => normalizedIdentityProbe.GetSummary());
 
             // Declare a property available in the property list, this gets evaluated "on demand" (when shown or used in formulas)
             this.AttachDelegate(name: "CurrentDateTime", valueProvider: () => DateTime.Now);

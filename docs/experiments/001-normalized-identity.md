@@ -20,22 +20,15 @@ does the plugin observe?
 - Cars/tracks/session types: FF1600 and at least one non-FF1600 car; track and
   session types to be recorded
 
-## Probe properties
+## Probe property
 
 ```text
-FF1600Tires.DiscoveryGameName
-FF1600Tires.DiscoveryCarId
-FF1600Tires.DiscoveryCarModel
-FF1600Tires.DiscoverySessionId
-FF1600Tires.DiscoveryGameRunning
-FF1600Tires.DiscoveryGamePaused
-FF1600Tires.DiscoveryGameReplay
-FF1600Tires.DiscoverySpectating
-FF1600Tires.DiscoveryIsInPit
-FF1600Tires.DiscoveryIsInPitLane
-FF1600Tires.DiscoveryFrameTimeUtc
-FF1600Tires.DiscoveryDataUpdateHz
+FF1600Tires.DiscoverySummary
 ```
+
+The single multiline property reports game, car, session, running, paused,
+replay, spectating, pit, frame-time, and update-cadence values. Bind one SimHub
+text widget to this property and capture the complete display at each state.
 
 ## Procedure
 

@@ -1,6 +1,7 @@
 using GameReaderCommon;
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.Threading;
 
 namespace FF1600TireEstimator.Plugin.TelemetryDiscovery
@@ -13,6 +14,30 @@ namespace FF1600TireEstimator.Plugin.TelemetryDiscovery
         private NormalizedIdentitySnapshot snapshot = NormalizedIdentitySnapshot.Empty;
 
         public NormalizedIdentitySnapshot Snapshot => Volatile.Read(ref snapshot);
+
+        public string GetSummary()
+        {
+            var current = Snapshot;
+            return string.Join(
+                Environment.NewLine,
+                "Game: " + Display(current.GameName),
+                "CarId: " + Display(current.CarId),
+                "CarModel: " + Display(current.CarModel),
+                "SessionId: " + Display(current.SessionId),
+                "GameRunning: " + current.GameRunning,
+                "GamePaused: " + current.GamePaused,
+                "GameReplay: " + current.GameReplay,
+                "Spectating: " + current.Spectating,
+                "IsInPit: " + Display(current.IsInPit),
+                "IsInPitLane: " + Display(current.IsInPitLane),
+                "FrameTimeUtc: " + Display(current.FrameTimeUtc),
+                "DataUpdateHz: " + current.DataUpdateHz.ToString("F2", CultureInfo.InvariantCulture));
+        }
+
+        private static string Display(object value)
+        {
+            return value == null || string.IsNullOrEmpty(value.ToString()) ? "<unavailable>" : value.ToString();
+        }
 
         public void Update(GameData data)
         {
