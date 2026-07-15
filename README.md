@@ -24,6 +24,8 @@ workers, and custom WPF UI are intentionally out of scope for this milestone.
 
 - `src/FF1600TireEstimator.Plugin/` — SimHub plugin solution and source.
 - `docs/architecture.md` — architectural boundaries and planned data flow.
+- `docs/telemetry-design.md` — telemetry discovery plan and provisional
+  persistence contract.
 - `docs/testing-protocol.md` — repeatable build and SimHub health checks.
 - `data-samples/` — future curated telemetry samples; raw evidence must never
   be overwritten.

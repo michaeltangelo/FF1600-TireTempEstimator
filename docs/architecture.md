@@ -21,6 +21,10 @@ temperature feed.
 4. Run a lightweight four-tire estimator from live telemetry.
 5. Publish estimator and later readiness values as central SimHub properties.
 
+The provisional persistence contract, confirmed SDK surface, experiment plan,
+and unresolved implementation decisions are detailed in
+`telemetry-design.md`.
+
 ## Data boundaries
 
 - **Raw telemetry:** durable, append-only experimental evidence.
