@@ -1,0 +1,19 @@
+.vs/
+[Bb]in/
+[Oo]bj/
+*.csproj.user
+
+# Local secrets and machine-specific configuration
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Generated telemetry and experimental captures
+*.csv
+*.tsv
+*.jsonl
+*.ndjson
+*.log
+data-samples/*
+!data-samples/.gitkeep
