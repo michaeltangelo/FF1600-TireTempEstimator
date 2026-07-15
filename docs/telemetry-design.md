@@ -29,13 +29,16 @@ Experiments are intentionally small and independently reviewable:
 2. **Raw compatibility probe:** establish the raw object's concrete runtime
    type and safely observe selected iRacing session/tire members across menu,
    track, pit, replay, and shutdown transitions.
-3. **Temperature update experiment:** measure normalized and raw carcass values
-   while driving and returning to the pits, including whether corners update
-   atomically.
-4. **Performance experiment:** measure update cadence, candidate snapshot size,
+3. **Temperature update experiment (completed once):** raw carcass values
+   changed atomically across all twelve channels one tick before the observed
+   `OnPitRoad` rising edge during a return to the pits.
+4. **Checkpoint repeatability experiment:** repeat normal pit return, tow/reset,
+   and fresh-session transitions to distinguish durable checkpoint behavior
+   from resets and other discontinuities.
+5. **Performance experiment:** measure update cadence, candidate snapshot size,
    serialization cost, and expected data rate without introducing production
    persistence.
-5. **Persistence spike:** only after the earlier results, test a limited JSONL
+6. **Persistence spike:** only after the earlier results, test a limited JSONL
    writer for shutdown, crash-tail, restart, and disk-error behavior.
 
 Each experiment gets a record under `docs/experiments/` containing the tested
@@ -58,11 +61,13 @@ Inspection of the installed SimHub assemblies confirms these public inputs:
   `SessionUniqueID`, driver/car IDs, session time/tick count, pit/garage state,
   and left/middle/right carcass values for all four tires.
 
-The official template warns that normalized plugins should not casually depend
-on the generic raw-data object. Therefore raw iRacing access is **not yet an
-approved dependency**. A runtime compatibility spike must first prove the
-concrete type, lifecycle stability, null behavior, units, and behavior during
-replay, menu, session changes, and pit transitions.
+The raw compatibility probe confirmed that iRacing's payload is exposed as an
+`iRacingSDK.Telemetry` object through the raw wrapper's `Telemetry` property.
+The twelve `LFtemp*`, `RFtemp*`, `LRtemp*`, and `RRtemp*` members were present
+and updated in a live FF1600 session. The payload becomes unavailable outside
+an active session. Raw access remains a version-sensitive dependency: a
+production adapter must validate the runtime types/members, fail closed when
+they are unavailable, and avoid per-frame reflection and allocation.
 
 ## Provisional recording eligibility
 
@@ -71,13 +76,14 @@ fail-closed. It may enter `Recording` only when all of these are true:
 
 1. SimHub reports an active iRacing session.
 2. The player is not in replay or spectating mode.
-3. The normalized car identity positively matches an approved FF1600 identity.
+3. The normalized car ID equals the observed FF1600 ID `raygr22`. The observed
+   display model is `Ray Formula 1600`; `CarId` is the eligibility key and the
+   model remains recorded context.
 4. The user has requested capture.
 
 Unknown, empty, or unexpected car identity must be ineligible. It must never be
-treated as FF1600 by default. A live inspection must first record the exact
-`CarId` and `CarModel` values SimHub exposes for the FF1600; the approved values
-will then be documented and tested as an explicit allowlist.
+treated as FF1600 by default. The comparison observation `mx5_mx52016` (Mazda
+MX-5 Cup) confirmed that the normalized car ID changes with the selected car.
 
 If game, session, or car identity changes during recording, the recorder stops
 accepting snapshots, finishes the current run through the bounded shutdown
@@ -241,8 +247,12 @@ Required fields:
 - Last on-track sequence, lap, and timestamp preceding the checkpoint.
 - Detection reason and detector version.
 
-Checkpoint detection policy remains unresolved until live captures establish
-the exact update timing and whether all corners update atomically.
+The observed transition changed all twelve channels atomically one telemetry
+tick before the observed `OnPitRoad` rising edge. The detector must therefore
+trigger from a change in the temperature vector itself. Pit, pit-lane, garage,
+and session state are recorded as context and validation signals, not assumed
+to be an earlier trigger. Exact acceptance, reset, duplicate, and debounce
+rules remain blocked on the checkpoint repeatability experiment.
 
 ## Provisional append-only files
 
@@ -311,15 +321,18 @@ Disk-full, access-denied, path, serialization, and writer exceptions must:
 
 ## Decisions required before implementation
 
-1. Record and approve the exact normalized FF1600 `CarId` and `CarModel`
-   allowlist values from a live SimHub session.
-2. Complete a live raw-access spike and decide whether raw iRacing fields are
-   an approved, version-checked dependency.
+1. Repeat the carcass transition experiment across normal pit return,
+   tow/reset, and fresh-session workflows; define checkpoint acceptance,
+   duplicate, and reset rules from those observations.
+2. Define the version-checked raw iRacing adapter contract and its fail-closed
+   behavior before using raw fields in production.
 3. Produce the exact field/unit/nullability table from observed FF1600 data.
-4. Select sampling cadence from measured `DataUpdate` rate and desired model
+4. Select sampling cadence from the observed approximately 60 Hz `DataUpdate`
+   rate and desired model
    bandwidth.
 5. Size the bounded queue and segment rotation from measured record size and
    worst-case disk stalls.
 6. Confirm action/state/property behavior in SimHub, including start while
    ineligible, car changes, repeated stop, and fault recovery.
-7. Define checkpoint detection from recorded pit-transition experiments.
+7. Optimize and remeasure the full-cadence temperature detector without the
+   prototype's per-frame reflection, allocations, or summary formatting.
