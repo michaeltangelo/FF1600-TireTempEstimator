@@ -2,21 +2,21 @@
 using System.Windows.Controls;
 using WoteverLocalization;
 
-namespace User.PluginSdkDemo
+namespace FF1600TireEstimator.Plugin
 {
     /// <summary>
     /// Logique d'interaction pour SettingsControlDemo.xaml
     /// </summary>
     public partial class SettingsControlDemo : UserControl
     {
-        public DataPluginDemo Plugin { get; }
+        public FF1600Tires Plugin { get; }
 
         public SettingsControlDemo()
         {
             InitializeComponent();
         }
 
-        public SettingsControlDemo(DataPluginDemo plugin) : this()
+        public SettingsControlDemo(FF1600Tires plugin) : this()
         {
             this.Plugin = plugin;
         }

@@ -7,8 +7,8 @@
     <ProjectGuid>{833040C9-FE5E-4CCF-B21D-71979E049B6B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>User.PluginSdkDemo</RootNamespace>
-    <AssemblyName>User.PluginSdkDemo</AssemblyName>
+    <RootNamespace>FF1600TireEstimator.Plugin</RootNamespace>
+    <AssemblyName>FF1600TireEstimator.Plugin</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -102,8 +102,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataPluginDemo.cs" />
-    <Compile Include="DataPluginDemoSettings.cs" />
+    <Compile Include="FF1600Tires.cs" />
+    <Compile Include="FF1600TiresSettings.cs" />
     <Compile Include="DemoDialogWindow.xaml.cs">
       <DependentUpon>DemoDialogWindow.xaml</DependentUpon>
     </Compile>
@@ -143,7 +143,7 @@
     <Content Include="sdkmenuicon.png" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Languages\User.PluginSdkDemo.resx">
+    <Content Include="Languages\FF1600TireEstimator.Plugin.resx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <EmbeddedResource Include="Properties\Resources.resx">

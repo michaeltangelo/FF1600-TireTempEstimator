@@ -37,6 +37,16 @@ when a manual verification establishes a new known-good baseline.
 
 ## Current verified baseline
 
-The untouched `User.PluginSdkDemo` template has been built in Debug,
-automatically deployed by its official post-build command, and manually
-confirmed to load as **Demo plugin** in SimHub.
+On July 15, 2026, the renamed `FF1600TireEstimator.Plugin` was verified as the
+current known-good bootstrap baseline:
+
+- Configuration: Debug, .NET Framework 4.8, AnyCPU.
+- Build: succeeded with Visual Studio 18 MSBuild.
+- Deployment: DLL, PDB, and RESX copied by the preserved template post-build
+  command.
+- Cleanup: obsolete `User.PluginSdkDemo` deployment artifacts removed.
+- SimHub: **FF1600 Tire Estimator** present, enabled, and settings page opened
+  without error.
+- `FF1600Tires.PluginAlive`: manually confirmed as `1`.
+- `FF1600Tires.DebugText`: manually confirmed as
+  `FF1600 tire estimator plugin running`.

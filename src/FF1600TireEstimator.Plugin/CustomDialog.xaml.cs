@@ -14,7 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace User.PluginSdkDemo
+namespace FF1600TireEstimator.Plugin
 {
     /// <summary>
     /// Logique d'interaction pour CustomDialog.xaml

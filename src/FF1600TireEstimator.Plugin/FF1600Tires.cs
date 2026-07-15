@@ -3,14 +3,14 @@ using SimHub.Plugins;
 using System;
 using System.Windows.Media;
 
-namespace User.PluginSdkDemo
+namespace FF1600TireEstimator.Plugin
 {
-    [PluginDescription("My plugin description")]
-    [PluginAuthor("Author")]
-    [PluginName("Demo plugin")]
-    public class DataPluginDemo : IPlugin, IDataPlugin, IWPFSettingsV2
+    [PluginDescription("Live tire temperature estimator for the iRacing FF1600")]
+    [PluginAuthor("Michael Tan")]
+    [PluginName("FF1600 Tire Estimator")]
+    public class FF1600Tires : IPlugin, IDataPlugin, IWPFSettingsV2
     {
-        public DataPluginDemoSettings Settings;
+        public FF1600TiresSettings Settings;
 
         /// <summary>
         /// Instance of the current plugin manager
@@ -25,7 +25,7 @@ namespace User.PluginSdkDemo
         /// <summary>
         /// Gets a short plugin title to show in left menu. Return null if you want to use the title as defined in PluginName attribute.
         /// </summary>
-        public string LeftMenuTitle => "Demo plugin";
+        public string LeftMenuTitle => "FF1600 Tire Estimator";
 
         /// <summary>
         /// Called one time per game data update, contains all normalized game data,
@@ -83,7 +83,11 @@ namespace User.PluginSdkDemo
             SimHub.Logging.Current.Info("Starting plugin");
 
             // Load settings
-            Settings = this.ReadCommonSettings<DataPluginDemoSettings>("GeneralSettings", () => new DataPluginDemoSettings());
+            Settings = this.ReadCommonSettings<FF1600TiresSettings>("GeneralSettings", () => new FF1600TiresSettings());
+
+            // Health properties used to verify that SimHub initialized this plugin.
+            this.AttachDelegate(name: "PluginAlive", valueProvider: () => 1);
+            this.AttachDelegate(name: "DebugText", valueProvider: () => "FF1600 tire estimator plugin running");
 
             // Declare a property available in the property list, this gets evaluated "on demand" (when shown or used in formulas)
             this.AttachDelegate(name: "CurrentDateTime", valueProvider: () => DateTime.Now);
