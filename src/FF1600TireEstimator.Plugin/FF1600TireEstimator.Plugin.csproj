@@ -105,6 +105,7 @@
     <Compile Include="FF1600Tires.cs" />
     <Compile Include="FF1600TiresSettings.cs" />
     <Compile Include="TelemetryDiscovery\NormalizedIdentityProbe.cs" />
+    <Compile Include="TelemetryDiscovery\RawIRacingCompatibilityProbe.cs" />
     <Compile Include="DemoDialogWindow.xaml.cs">
       <DependentUpon>DemoDialogWindow.xaml</DependentUpon>
     </Compile>

@@ -12,6 +12,7 @@ namespace FF1600TireEstimator.Plugin
     public class FF1600Tires : IPlugin, IDataPlugin, IWPFSettingsV2
     {
         private readonly NormalizedIdentityProbe normalizedIdentityProbe = new NormalizedIdentityProbe();
+        private readonly RawIRacingCompatibilityProbe rawIRacingCompatibilityProbe = new RawIRacingCompatibilityProbe();
 
         public FF1600TiresSettings Settings;
 
@@ -42,6 +43,7 @@ namespace FF1600TireEstimator.Plugin
         public void DataUpdate(PluginManager pluginManager, ref GameData data)
         {
             normalizedIdentityProbe.Update(data);
+            rawIRacingCompatibilityProbe.Update(data.NewData);
 
             // Define the value of our property (declared in init)
             if (data.GameRunning)
@@ -95,7 +97,9 @@ namespace FF1600TireEstimator.Plugin
             this.AttachDelegate(name: "DebugText", valueProvider: () => "FF1600 tire estimator plugin running");
 
             // Temporary normalized telemetry discovery display.
-            this.AttachDelegate(name: "DiscoverySummary", valueProvider: () => normalizedIdentityProbe.GetSummary());
+            this.AttachDelegate(
+                name: "DiscoverySummary",
+                valueProvider: () => normalizedIdentityProbe.GetSummary() + Environment.NewLine + rawIRacingCompatibilityProbe.GetSummary());
 
             // Declare a property available in the property list, this gets evaluated "on demand" (when shown or used in formulas)
             this.AttachDelegate(name: "CurrentDateTime", valueProvider: () => DateTime.Now);
