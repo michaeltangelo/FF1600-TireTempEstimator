@@ -34,6 +34,7 @@ namespace FF1600TireEstimator.Plugin.TelemetryDiscovery
         private PropertyInfo[] temperatureProperties;
         private Type wrapperType;
         private Type telemetryType;
+        private Guid? activeSessionId;
         private double[] previousTemperatures;
         private bool? previousOnPitRoad;
         private long samples;
@@ -82,6 +83,11 @@ namespace FF1600TireEstimator.Plugin.TelemetryDiscovery
                 ResetFrameState();
                 Publish("Waiting for active FF1600 telemetry", null, null);
                 return;
+            }
+
+            if (activeSessionId != data.SessionId)
+            {
+                ResetSessionState(data.SessionId);
             }
 
             var wrapper = status.GetRawDataObject();
@@ -182,6 +188,20 @@ namespace FF1600TireEstimator.Plugin.TelemetryDiscovery
         {
             previousTemperatures = null;
             previousOnPitRoad = null;
+        }
+
+        private void ResetSessionState(Guid sessionId)
+        {
+            activeSessionId = sessionId;
+            ResetFrameState();
+            samples = 0;
+            pitEntries = 0;
+            changeEvents = 0;
+            totalCalls = 0;
+            measuredCalls = 0;
+            totalElapsedTicks = 0;
+            maxElapsedTicks = 0;
+            Volatile.Write(ref snapshot, CarcassTransitionSnapshot.Empty);
         }
 
         private void Publish(string status, string pitEntrySummary, string temperatureChangeSummary)
