@@ -72,6 +72,13 @@ namespace FF1600TireEstimator.Plugin.Recording
         {
             Field(builder, "is_in_pit", record.IsInPit);
             Field(builder, "is_in_pit_lane", record.IsInPitLane);
+            Field(builder, "detection_reason", record.DetectionReason);
+            Field(
+                builder,
+                "previous_capture_run_id",
+                record.PreviousCaptureRunId.HasValue
+                    ? record.PreviousCaptureRunId.Value.ToString("D")
+                    : null);
             ArrayField(builder, "previous_carcass_temperatures", record.PreviousTemperatures);
             EncodeRaw(builder, record.Raw);
         }

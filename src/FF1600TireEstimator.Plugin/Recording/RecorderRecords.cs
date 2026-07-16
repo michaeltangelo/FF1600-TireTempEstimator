@@ -122,18 +122,24 @@ namespace FF1600TireEstimator.Plugin.Recording
             RawIRacingFrame raw,
             double[] previousTemperatures,
             int isInPit,
-            int isInPitLane)
+            int isInPitLane,
+            string detectionReason,
+            Guid? previousCaptureRunId)
             : base("carcass_checkpoint", sessionId, captureRunId, sequence, capturedAtUtc)
         {
             Raw = raw;
             PreviousTemperatures = previousTemperatures;
             IsInPit = isInPit;
             IsInPitLane = isInPitLane;
+            DetectionReason = detectionReason;
+            PreviousCaptureRunId = previousCaptureRunId;
         }
 
         public RawIRacingFrame Raw { get; }
         public double[] PreviousTemperatures { get; }
         public int IsInPit { get; }
         public int IsInPitLane { get; }
+        public string DetectionReason { get; }
+        public Guid? PreviousCaptureRunId { get; }
     }
 }

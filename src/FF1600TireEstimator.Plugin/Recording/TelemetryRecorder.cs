@@ -28,6 +28,9 @@ namespace FF1600TireEstimator.Plugin.Recording
         private long rejectedRecords;
         private long nextSampleAt;
         private double[] previousTemperatures;
+        private Guid resumeSessionId;
+        private Guid resumePreviousRunId;
+        private double[] resumeTemperatures;
         private RecorderStatusSnapshot status = RecorderStatusSnapshot.Stopped;
 
         internal static string EvidenceRoot =>
@@ -91,8 +94,22 @@ namespace FF1600TireEstimator.Plugin.Recording
 
             if (!eligible)
             {
+                if (!captureRequested)
+                {
+                    ClearResumeCandidate();
+                }
+
                 if (captureRunId != Guid.Empty)
                 {
+                    if (captureRequested)
+                    {
+                        PreserveResumeCandidate();
+                    }
+                    else
+                    {
+                        ClearResumeCandidate();
+                    }
+
                     CloseRun("Eligibility lost");
                 }
 
@@ -122,6 +139,11 @@ namespace FF1600TireEstimator.Plugin.Recording
                     CloseRun("Session changed");
                 }
 
+                if (resumeSessionId != Guid.Empty && resumeSessionId != data.SessionId)
+                {
+                    ClearResumeCandidate();
+                }
+
                 activeSessionId = data.SessionId;
                 captureRunId = Guid.NewGuid();
                 sequence = 0;
@@ -130,6 +152,7 @@ namespace FF1600TireEstimator.Plugin.Recording
                 TryQueue(WriterMessage.Open(activeSessionId, captureRunId));
             }
 
+            DetectResumeCheckpoint(normalized, raw);
             DetectCheckpoint(data, normalized, raw);
 
             var now = Stopwatch.GetTimestamp();
@@ -161,6 +184,7 @@ namespace FF1600TireEstimator.Plugin.Recording
         public void Dispose()
         {
             captureRequested = false;
+            ClearResumeCandidate();
             CloseRun("Plugin shutdown");
             queue.CompleteAdding();
             if (!writerThread.Join(TimeSpan.FromSeconds(5)))
@@ -186,10 +210,63 @@ namespace FF1600TireEstimator.Plugin.Recording
                             raw,
                             (double[])previousTemperatures.Clone(),
                             normalized.IsInPit,
-                            normalized.IsInPitLane)));
+                            normalized.IsInPitLane,
+                            "temperature_change",
+                            null)));
             }
 
             previousTemperatures = (double[])raw.CarcassTemperatures.Clone();
+        }
+
+        private void DetectResumeCheckpoint(StatusDataBase normalized, RawIRacingFrame raw)
+        {
+            if (resumeSessionId == Guid.Empty || resumeSessionId != activeSessionId || resumeTemperatures == null)
+            {
+                return;
+            }
+
+            if (TemperaturesChanged(resumeTemperatures, raw.CarcassTemperatures))
+            {
+                TryQueue(
+                    WriterMessage.Record(
+                        new CheckpointRecord(
+                            activeSessionId,
+                            captureRunId,
+                            ++sequence,
+                            DateTime.UtcNow,
+                            raw,
+                            (double[])resumeTemperatures.Clone(),
+                            normalized.IsInPit,
+                            normalized.IsInPitLane,
+                            "telemetry_resume",
+                            resumePreviousRunId)));
+            }
+
+            ClearResumeCandidate();
+        }
+
+        private void PreserveResumeCandidate()
+        {
+            if (activeSessionId == Guid.Empty || captureRunId == Guid.Empty || previousTemperatures == null)
+            {
+                return;
+            }
+
+            resumeSessionId = activeSessionId;
+            resumePreviousRunId = captureRunId;
+            resumeTemperatures = (double[])previousTemperatures.Clone();
+        }
+
+        private void ClearResumeCandidate()
+        {
+            resumeSessionId = Guid.Empty;
+            resumePreviousRunId = Guid.Empty;
+            resumeTemperatures = null;
+        }
+
+        private static bool TemperaturesChanged(double[] previous, double[] current)
+        {
+            return current.Where((value, index) => Math.Abs(value - previous[index]) > 0.000001).Any();
         }
 
         private void CloseRun(string reason)
