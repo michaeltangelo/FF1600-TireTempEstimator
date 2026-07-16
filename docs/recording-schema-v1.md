@@ -69,6 +69,18 @@ iRacing context, the previous twelve-value vector, and the new vector. Tow,
 normal pit return, and other transition classifications remain analysis-time
 labels until more evidence supports a durable automatic rule.
 
+Checkpoint records also include:
+
+- `detection_reason`: `temperature_change` for an in-run update or
+  `telemetry_resume` when changed values first appear after a temporary
+  same-session interruption such as tow/loading.
+- `previous_capture_run_id`: the preceding run ID for a
+  `telemetry_resume` checkpoint; otherwise `null`.
+
+The recorder retains only the final twelve-value vector and run ID in memory
+across a temporary eligibility loss. It never reopens, combines, or modifies
+the preceding run's evidence files.
+
 ## Failure behavior
 
 The bounded queue holds 4,096 messages. If it fills, the recorder stops capture,
