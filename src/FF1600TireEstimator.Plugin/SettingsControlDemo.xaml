@@ -1,91 +1,83 @@
-﻿<UserControl x:Class="FF1600TireEstimator.Plugin.SettingsControlDemo" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:converter="http://metro.mahapps.com/winfx/xaml/iconpacks" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:iconpacks="clr-namespace:MahApps.Metro.IconPacks;assembly=MahApps.Metro.IconPacks.Material" xmlns:local="clr-namespace:FF1600TireEstimator.Plugin" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:styles="clr-namespace:SimHub.Plugins.Styles;assembly=SimHub.Plugins" xmlns:ui="clr-namespace:SimHub.Plugins.UI;assembly=SimHub.Plugins" mc:Ignorable="d">
-    <ScrollViewer>
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition Width="0*" />
-            </Grid.ColumnDefinitions>
-            
-            
+<UserControl x:Class="FF1600TireEstimator.Plugin.SettingsControlDemo"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:styles="clr-namespace:SimHub.Plugins.Styles;assembly=SimHub.Plugins"
+             mc:Ignorable="d">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="24" MaxWidth="900">
+            <TextBlock FontSize="26" FontWeight="SemiBold" Text="FF1600 Tire Estimator" />
+            <TextBlock Margin="0,6,0,22" Opacity="0.72"
+                       Text="Durable telemetry capture for iRacing's Ray Formula 1600."
+                       TextWrapping="Wrap" />
 
-            <styles:SHSection Title="MY PLUGIN OPTIONS" Grid.ColumnSpan="2" ShowSeparator="True">
+            <Border Padding="20" BorderBrush="#3F808080" BorderThickness="1" CornerRadius="5">
                 <StackPanel>
+                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Telemetry capture" />
+                    <TextBlock Margin="0,5,0,16" Opacity="0.72"
+                               Text="Capture arms outside an eligible session and records automatically when a live FF1600 session is available."
+                               TextWrapping="Wrap" />
+                    <WrapPanel Margin="0,0,0,18">
+                        <styles:SHButtonPrimary Margin="0,0,10,0" Padding="22,8"
+                                                Click="StartCapture_Click">Start capture</styles:SHButtonPrimary>
+                        <styles:SHButtonSecondary Margin="0,0,10,0" Padding="22,8"
+                                                  Click="StopCapture_Click">Stop capture</styles:SHButtonSecondary>
+                        <styles:SHButtonSecondary Padding="22,8"
+                                                  Click="ToggleCapture_Click">Toggle</styles:SHButtonSecondary>
+                    </WrapPanel>
 
-
-                    <styles:SHSection Title="Localization support" Grid.ColumnSpan="2" ShowSeparator="True">
-                        <Label Content="{SLoc MyPlugin_TranslationExample}"/>
-                    </styles:SHSection>
-                    
-
-                    <styles:SHButtonPrimary HorizontalAlignment="Left">Primary button</styles:SHButtonPrimary>
-
-                    <styles:SHButtonSecondary HorizontalAlignment="Left">Secondary button</styles:SHButtonSecondary>
-
-                    <styles:SHLinkButton HorizontalAlignment="Left">Link button</styles:SHLinkButton>
-
-                    <styles:SHLinkButtonSmall HorizontalAlignment="Left">Link button small</styles:SHLinkButtonSmall>
-
-                    <ui:ControlsEditor ActionName="FF1600Tires.IncrementSpeedWarning" FriendlyName="Increment Speed Warning" />
-                    <ui:ControlsEditor ActionName="FF1600Tires.InputPressed" FriendlyName="Button mapping" />
-
-                    <styles:SHSectionSeparator />
-
-                    <styles:SHSubSection Title="Subsection">
-                        <Label>Subsection content</Label>
-                    </styles:SHSubSection>
-                    <styles:SHSectionSeparator />
-
-                    <styles:SHToggleCheckbox>
-                        Hello
-                    </styles:SHToggleCheckbox>
-                    <styles:SHSectionSeparator />
-
-                    <styles:SHTabControl>
-                        <styles:SHTabItem Header="Tab1" />
-                        <styles:SHTabItem Header="Tab2" />
-                        <styles:SHTabItem Header="Tab3" />
-                    </styles:SHTabControl>
-                    <styles:SHSectionSeparator />
-
-                    <styles:SHListBox>
-                        <ListBoxItem>Hello 1</ListBoxItem>
-                        <ListBoxItem>Hello 2</ListBoxItem>
-                        <ListBoxItem>Hello 3</ListBoxItem>
-                    </styles:SHListBox>
-                    <styles:SHSectionSeparator />
-
-                    <styles:SHExpander>
-                        <styles:SHExpander.Header>
-                            Expander
-                        </styles:SHExpander.Header>
-                        Hello 2
-                    </styles:SHExpander>
-                    <styles:SHSectionSeparator />
-
-                    <styles:SHTitledGroup Title="Titled group">
-                        Titled group content
-                    </styles:SHTitledGroup>
-                    <styles:SHSectionSeparator />
-
-                    <ui:TitledSlider Title="hello" Maximum="100" Minimum="0" Value="50" />
-
-                    <ui:TitledRangeSlider Title="hello" LowerValue="50" Maximum="100" Minimum="0" UpperValue="70" />
-
-                    <styles:SHSectionSeparator />
-
-                    <ui:TitledSlider Title="hello" IsChecked="false" Maximum="100" Minimum="0" ShowCheckbox="True" Value="50" />
-
-                    <styles:SHSectionSeparator />
-
-                    <styles:SHButtonPrimary Click="StyledMessageBox_Click">Show styled messagebox</styles:SHButtonPrimary>
-                    <styles:SHButtonPrimary Click="DemoWindow_Click">Open new window</styles:SHButtonPrimary>
-                    <styles:SHButtonPrimary Click="DemodialogWindow_Click">Open dialog window</styles:SHButtonPrimary>
-
-                    <styles:SHSectionSeparator />
-                    <iconpacks:PackIconMaterial Width="40" Height="40" Kind="Plus" />
-
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" FontWeight="SemiBold" Text="State" />
+                        <TextBlock Grid.Row="0" Grid.Column="1" x:Name="StateValue" Text="Stopped" />
+                        <TextBlock Grid.Row="1" Margin="0,8,0,0" FontWeight="SemiBold" Text="Requested" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" Margin="0,8,0,0" x:Name="RequestedValue" Text="False" />
+                        <TextBlock Grid.Row="2" Margin="0,8,0,0" FontWeight="SemiBold" Text="Run ID" />
+                        <TextBlock Grid.Row="2" Grid.Column="1" Margin="0,8,0,0" x:Name="RunIdValue" Text="&lt;none&gt;" TextWrapping="Wrap" />
+                        <TextBlock Grid.Row="3" Margin="0,8,0,0" FontWeight="SemiBold" Text="Accepted records" />
+                        <TextBlock Grid.Row="3" Grid.Column="1" Margin="0,8,0,0" x:Name="AcceptedValue" Text="0" />
+                        <TextBlock Grid.Row="4" Margin="0,8,0,0" FontWeight="SemiBold" Text="Rejected records" />
+                        <TextBlock Grid.Row="4" Grid.Column="1" Margin="0,8,0,0" x:Name="RejectedValue" Text="0" />
+                        <TextBlock Grid.Row="5" Margin="0,8,0,0" FontWeight="SemiBold" Text="Fault" />
+                        <TextBlock Grid.Row="5" Grid.Column="1" Margin="0,8,0,0" x:Name="FaultValue" Text="&lt;none&gt;" TextWrapping="Wrap" />
+                    </Grid>
                 </StackPanel>
-            </styles:SHSection>
-        </Grid>
+            </Border>
+
+            <Border Margin="0,18,0,0" Padding="20" BorderBrush="#3F808080" BorderThickness="1" CornerRadius="5">
+                <StackPanel>
+                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Evidence location" />
+                    <TextBox Margin="0,10,0,0" x:Name="EvidencePathValue"
+                             IsReadOnly="True" TextWrapping="Wrap" />
+                    <TextBlock Margin="0,8,0,0" Opacity="0.72"
+                               Text="Evidence is append-only JSON Lines. Existing runs are never overwritten."
+                               TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+
+            <Border Margin="0,18,0,0" Padding="20" BorderBrush="#3F808080" BorderThickness="1" CornerRadius="5">
+                <StackPanel>
+                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Diagnostics" />
+                    <TextBox Margin="0,10,0,0" x:Name="DiagnosticsValue"
+                             MinHeight="180" MaxHeight="360" IsReadOnly="True"
+                             FontFamily="Consolas" FontSize="12"
+                             HorizontalScrollBarVisibility="Auto"
+                             VerticalScrollBarVisibility="Auto"
+                             TextWrapping="NoWrap" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
     </ScrollViewer>
 </UserControl>

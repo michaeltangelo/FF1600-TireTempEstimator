@@ -2,6 +2,8 @@
 using SimHub.Plugins;
 using System;
 using System.Windows.Media;
+using FF1600TireEstimator.Plugin.TelemetryDiscovery;
+using FF1600TireEstimator.Plugin.Recording;
 
 namespace FF1600TireEstimator.Plugin
 {
@@ -10,7 +12,29 @@ namespace FF1600TireEstimator.Plugin
     [PluginName("FF1600 Tire Estimator")]
     public class FF1600Tires : IPlugin, IDataPlugin, IWPFSettingsV2
     {
+        private readonly NormalizedIdentityProbe normalizedIdentityProbe = new NormalizedIdentityProbe();
+        private readonly RawIRacingCompatibilityProbe rawIRacingCompatibilityProbe = new RawIRacingCompatibilityProbe();
+        private readonly CarcassTransitionProbe carcassTransitionProbe = new CarcassTransitionProbe();
+        private readonly TelemetryRecorder telemetryRecorder = new TelemetryRecorder();
+
         public FF1600TiresSettings Settings;
+
+        internal RecorderStatusSnapshot RecorderStatus => telemetryRecorder.Status;
+        internal string EvidenceRoot => TelemetryRecorder.EvidenceRoot;
+
+        internal void StartTelemetryCapture() => telemetryRecorder.StartCapture();
+        internal void StopTelemetryCapture() => telemetryRecorder.StopCapture();
+        internal void ToggleTelemetryCapture() => telemetryRecorder.ToggleCapture();
+
+        internal string GetDiscoverySummary()
+        {
+            return string.Join(
+                Environment.NewLine,
+                normalizedIdentityProbe.GetSummary(),
+                rawIRacingCompatibilityProbe.GetSummary(),
+                carcassTransitionProbe.Snapshot.GetSummary(),
+                telemetryRecorder.Status.GetSummary());
+        }
 
         /// <summary>
         /// Instance of the current plugin manager
@@ -38,18 +62,10 @@ namespace FF1600TireEstimator.Plugin
         /// <param name="data">Current game data, including current and previous data frame.</param>
         public void DataUpdate(PluginManager pluginManager, ref GameData data)
         {
-            // Define the value of our property (declared in init)
-            if (data.GameRunning)
-            {
-                if (data.OldData != null && data.NewData != null)
-                {
-                    if (data.OldData.SpeedKmh < Settings.SpeedWarningLevel && data.OldData.SpeedKmh >= Settings.SpeedWarningLevel)
-                    {
-                        // Trigger an event
-                        this.TriggerEvent("SpeedWarning");
-                    }
-                }
-            }
+            normalizedIdentityProbe.Update(data);
+            rawIRacingCompatibilityProbe.Update(data.NewData);
+            carcassTransitionProbe.Update(data);
+            telemetryRecorder.Update(data);
         }
 
         /// <summary>
@@ -59,6 +75,8 @@ namespace FF1600TireEstimator.Plugin
         /// <param name="pluginManager"></param>
         public void End(PluginManager pluginManager)
         {
+            telemetryRecorder.Dispose();
+
             // Save settings
             this.SaveCommonSettings("GeneralSettings", Settings);
         }
@@ -89,37 +107,23 @@ namespace FF1600TireEstimator.Plugin
             this.AttachDelegate(name: "PluginAlive", valueProvider: () => 1);
             this.AttachDelegate(name: "DebugText", valueProvider: () => "FF1600 tire estimator plugin running");
 
-            // Declare a property available in the property list, this gets evaluated "on demand" (when shown or used in formulas)
-            this.AttachDelegate(name: "CurrentDateTime", valueProvider: () => DateTime.Now);
-
-            // Declare an event
-            this.AddEvent(eventName: "SpeedWarning");
+            // Temporary normalized telemetry discovery display.
+            this.AttachDelegate(
+                name: "DiscoverySummary",
+                valueProvider: GetDiscoverySummary);
 
             // Declare an action which can be called
             this.AddAction(
-                actionName: "IncrementSpeedWarning",
-                actionStart: (a, b) =>
-                {
-                    Settings.SpeedWarningLevel++;
-                    SimHub.Logging.Current.Info("Speed warning changed");
-                });
+                actionName: "StartTelemetryCapture",
+                actionStart: (a, b) => StartTelemetryCapture());
 
-            // Declare an action which can be called, actions are meant to be "triggered" and does not reflect an input status (pressed/released ...)
             this.AddAction(
-                actionName: "DecrementSpeedWarning",
-                actionStart: (a, b) =>
-                {
-                    Settings.SpeedWarningLevel--;
-                });
+                actionName: "StopTelemetryCapture",
+                actionStart: (a, b) => StopTelemetryCapture());
 
-            // Declare an input which can be mapped, inputs are meant to be keeping state of the source inputs,
-            // they won't trigger on inputs not capable of "holding" their state.
-            // Internally they work similarly to AddAction, but are restricted to a "during" behavior
-            this.AddInputMapping(
-                inputName: "InputPressed",
-                inputPressed: (a, b) => {/* One of the mapped input has been pressed   */},
-                inputReleased: (a, b) => {/* One of the mapped input has been released */}
-            );
+            this.AddAction(
+                actionName: "ToggleTelemetryCapture",
+                actionStart: (a, b) => ToggleTelemetryCapture());
         }
     }
 }

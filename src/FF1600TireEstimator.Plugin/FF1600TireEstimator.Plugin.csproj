@@ -104,12 +104,13 @@
   <ItemGroup>
     <Compile Include="FF1600Tires.cs" />
     <Compile Include="FF1600TiresSettings.cs" />
-    <Compile Include="DemoDialogWindow.xaml.cs">
-      <DependentUpon>DemoDialogWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="DemoWindow.xaml.cs">
-      <DependentUpon>DemoWindow.xaml</DependentUpon>
-    </Compile>
+    <Compile Include="TelemetryDiscovery\NormalizedIdentityProbe.cs" />
+    <Compile Include="TelemetryDiscovery\RawIRacingCompatibilityProbe.cs" />
+    <Compile Include="TelemetryDiscovery\CarcassTransitionProbe.cs" />
+    <Compile Include="Recording\JsonLinesEncoder.cs" />
+    <Compile Include="Recording\RawIRacingReader.cs" />
+    <Compile Include="Recording\RecorderRecords.cs" />
+    <Compile Include="Recording\TelemetryRecorder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -121,14 +122,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="DemoDialogWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="DemoWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Properties\DesignTimeResources.xaml" Condition="'$(DesignTime)'=='true' OR ('$(SolutionPath)'!='' AND Exists('$(SolutionPath)') AND '$(BuildingInsideVisualStudio)'!='true' AND '$(BuildingInsideExpressionBlend)'!='true')">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
